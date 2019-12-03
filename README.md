@@ -1,4 +1,4 @@
-<p align="center"><img width="85%" src="demo.png"></img></p>
+<p align="center"><img width="45%" src="demo.png"></img></p>
 
 # cpp-Mandelbrot
 An example how to calculate the mandelbrot fractal with several threads using pthread and compressing / decompressing the result *.ppm* file.
