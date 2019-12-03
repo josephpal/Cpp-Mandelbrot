@@ -1,0 +1,15 @@
+--------------------------------------------------------------------------------------
+original *.ppm file: 600x600 (for other resolutions the best achievable compress level
+							  may variant)
+
+0bits combined -> result in 360000 characters, total file size: 2.2Mb 
+
+--------------------------------------------------------------------------------------
+combining bits for compression:
+
+12bits -> result in 30000 characters, total file size 87,1 kb 	->	91.67% reduction
+20bits -> result in 18000 characters, total file size 69,1 kb	->	95%
+24bits -> result in 15000 characters, total file size 62,9 kb	->	95,83%
+30bits -> result in 12000 characters, total file size 58,6 kb	->	96,67%
+40bits -> out of range of stoi() function
+--------------------------------------------------------------------------------------
