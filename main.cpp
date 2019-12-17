@@ -99,7 +99,7 @@ void createMandelbrotImageCompressedThread(Mandelbrot * mandelbrot, std::string 
 	mandelbrot->calculateCompressedImage(returnBuf);
 }
 
-void createMandelbrotImageCompressed(std::string filename, unsigned int width, unsigned int height, int numOfThreads) {
+void createMandelbrotImageCompressed(std::string filename, unsigned int width, unsigned int height, int numOfThreads, int numOfCombinedBits) {
 
 	/*
 	 * 	sub image coordinate computation (e.g. 600x600, 5 threads) -> row method
@@ -154,9 +154,9 @@ void createMandelbrotImageCompressed(std::string filename, unsigned int width, u
 
 		// combine maximal compressionLevel bits of the bitstream to a new number
 		// e.g. 0110 0010 ... -> 10 2 ...
-		int numOfCombinedBits = HelperFunctions::getInstance()->gd(width, 30);
+		int numCombinedBits = HelperFunctions::getInstance()->gd(width, numOfCombinedBits);
 
-		std::cout << "compression level (bits combined): " << numOfCombinedBits << std::endl;
+		std::cout << "compression level (bits combined): " << numCombinedBits << std::endl;
 
 		std::vector<std::thread> workers;
 
@@ -169,6 +169,7 @@ void createMandelbrotImageCompressed(std::string filename, unsigned int width, u
 			maxY = (i+1) * (height / numOfThreads);
 
 			partMandelbrot[i] = new Mandelbrot(width, height, minX, maxX, minY, maxY);
+			partMandelbrot[i]->setCompressionLevel(numCombinedBits);
 
 			workers.push_back(std::thread(createMandelbrotImageCompressedThread, partMandelbrot[i], std::ref(buf[i])));
 
@@ -179,7 +180,7 @@ void createMandelbrotImageCompressed(std::string filename, unsigned int width, u
 			th.join();
 		}
 
-		std::cout << "Compressed from " << width*height << " to " << ((width * height) / numOfCombinedBits) << " characters -> done.\n" << std::endl;
+		std::cout << "Compressed from " << width*height << " to " << ((width * height) / numCombinedBits) << " characters -> done.\n" << std::endl;
 
 		// collect results and create PPM file to store the compressed image
 
@@ -204,33 +205,40 @@ void createMandelbrotImageCompressed(std::string filename, unsigned int width, u
 int main() {
 	std::cout << "Mandelbrot Fractal Generator 1.0\n" << std::endl;
 
-	/* example to create the Mandelbrot set depending on the number of iterations */
-	PPMImage image_1(1024, 1024);
+//	/* example to create the Mandelbrot set depending on the number of iterations */
+//	PPMImage image_1(1024, 1024);
+//
+//	for(int i = 0; i<50; i++) {
+//		if( i % 10 == 0 ) {
+//			createMandelbrotImage(image_1, 1024, 1024, 16, i);
+//			image_1.save("pic/mandelbrot-" + std::to_string(i/10) + ".ppm");
+//		}
+//	}
+//
+//	/* example on how to encode / decode a created compressed *.ppm image */
+//	PPMImage image_2(600, 600);
+//
+//	/* compress */
+//
+//	/* using the chess board method + compression afterwards */
+//	createMandelbrotImage(image_2, 600, 600, 16, 34);
+//	image_2.codeImg("pic/coded/mandelbrot-coded-1.ppm");
+//
+//	/* using the row method and direct compression on each thread */
+//	createMandelbrotImageCompressed("pic/coded/mandelbrot-coded-2.ppm", 600, 600, 4, 34);
 
-	for(int i = 0; i<50; i++) {
-		if( i % 10 == 0 ) {
-			createMandelbrotImage(image_1, 1024, 1024, 16, i);
-			image_1.save("pic/mandelbrot-" + std::to_string(i/10) + ".ppm");
+	/* test the compression level regarding to the result file size */
+	for(int i = 2; i<32; i++) {
+		if( 600 % i == 0 ) {
+			createMandelbrotImageCompressed("pic/coded/combined-bits/mandelbrot-coded-" + std::to_string(i) + ".ppm", 600, 600, 4, i);
 		}
 	}
-
-	/* example on how to encode / decode a created compressed *.ppm image */
-	PPMImage image_2(600, 600);
-
-	/* compress */
-
-	/* using the chess board method */
-	createMandelbrotImage(image_2, 600, 600, 16, 34);
-	image_2.codeImg("pic/mandelbrot-coded-1.ppm");
-
-	/* using the row method */
-	createMandelbrotImageCompressed("pic/mandelbrot-coded-2.ppm", 600, 600, 4);
-
-	/* uncompress */
-
-	PPMImage image_3(600, 600);
-	image_3.decodeImg("pic/mandelbrot-coded-1.ppm", "pic/mandelbrot-decoded-1.ppm");
-	image_3.decodeImg("pic/mandelbrot-coded-2.ppm", "pic/mandelbrot-decoded-2.ppm");
+//
+//	/* uncompress */
+//
+//	PPMImage image_3(600, 600);
+//	image_3.decodeImg("pic/coded/mandelbrot-coded-1.ppm", "pic/decoded/mandelbrot-decoded-1.ppm");
+//	image_3.decodeImg("pic/coded/mandelbrot-coded-2.ppm", "pic/decoded/mandelbrot-decoded-2.ppm");
 
     return 0;
 }
