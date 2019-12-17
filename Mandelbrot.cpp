@@ -17,6 +17,7 @@ Mandelbrot::Mandelbrot() {
 	this->maxY = 0;
 
 	numOfCombinedBits = 0;
+	iterations = 34;
 }
 
 Mandelbrot::Mandelbrot(unsigned width, unsigned height) {
@@ -29,6 +30,7 @@ Mandelbrot::Mandelbrot(unsigned width, unsigned height) {
 	this->maxY = 0;
 
 	numOfCombinedBits = HelperFunctions::getInstance()->gd(width, 30);
+	iterations = 34;
 }
 
 Mandelbrot::Mandelbrot(unsigned width, unsigned height, unsigned minX, unsigned maxX, unsigned minY, unsigned maxY) {
@@ -41,6 +43,20 @@ Mandelbrot::Mandelbrot(unsigned width, unsigned height, unsigned minX, unsigned 
 	this->maxY = maxY;
 
 	numOfCombinedBits = HelperFunctions::getInstance()->gd(width, 30);
+	iterations = 34;
+}
+
+Mandelbrot::Mandelbrot(unsigned width, unsigned height, unsigned minX, unsigned maxX, unsigned minY, unsigned maxY, int iterations) {
+	this->width = width;
+	this->height = height;
+
+	this->minX = minX;
+	this->maxX = maxX;
+	this->minY = minY;
+	this->maxY = maxY;
+
+	numOfCombinedBits = HelperFunctions::getInstance()->gd(width, 30);
+	this->iterations = iterations;
 }
 
 Mandelbrot::~Mandelbrot() {
@@ -61,7 +77,7 @@ void Mandelbrot::calculateCompressedImage(std::string &returnBuf) {
 	double Im_factor = (MaxIm - MinIm) / (height - 1);
 
 	// implementation of the mathematical limes -> to infinite (in this case 34)
-	unsigned MaxIterations = 34;
+	unsigned MaxIterations = this->iterations;
 
 	// compression buffer
 	int bufIndex = 0;
@@ -116,7 +132,7 @@ void Mandelbrot::calculateImage(PPMImage &image) {
 	double Im_factor = (MaxIm - MinIm) / (height - 1);
 
 	// implementation of the mathematical limes -> to infinite (in this case 34)
-	unsigned MaxIterations = 34;
+	unsigned MaxIterations = this->iterations;
 
 	for (unsigned y = minY; y < maxY; ++y) {
 		double c_im = MaxIm - y * Im_factor;
@@ -141,13 +157,13 @@ void Mandelbrot::calculateImage(PPMImage &image) {
 
 			if (isInside) {
 				// rotating the image (left orientated) -> x and y change
-				image[x][y].r = 1;
-				image[x][y].g = 0;
-				image[x][y].b = 0;
+				image[y][x].r = 0;
+				image[y][x].g = 0;
+				image[y][x].b = 0;
 			} else {
-				image[x][y].r = 0;
-				image[x][y].g = 0;
-				image[x][y].b = 0;
+				image[y][x].r = 1;
+				image[y][x].g = 1;
+				image[y][x].b = 1;
 			}
 		}
 	}

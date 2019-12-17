@@ -48,6 +48,17 @@ public:
 	 *  @return ---
 	*/
 	Mandelbrot(unsigned width, unsigned height, unsigned minX, unsigned maxX, unsigned minY, unsigned maxY);
+
+	/** Overloaded constructor; image width and height will be set on @param; the image has to be a square (width = height!).
+	 * 	In case if width != height, height will be set to width
+	 *
+	 *  @param	specify the width of the image
+	 *  @param	specify the height of the image
+	 *  @param	specify the borders of the part image (minX, maxX, minY and maxY)
+	 *  @return ---
+	*/
+	Mandelbrot(unsigned width, unsigned height, unsigned minX, unsigned maxX, unsigned minY, unsigned maxY, int iterations);
+
 	virtual ~Mandelbrot();
 
 	/** function to set the number of bits, which will be combined to an integer value for writing into the *.ppm file.
@@ -100,7 +111,7 @@ private:
 
 	unsigned minX, maxX, minY, maxY;
 
-	int numOfCombinedBits;
+	int numOfCombinedBits, iterations;
 };
 
 #endif /* MANDELBROT_H_ */

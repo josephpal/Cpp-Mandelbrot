@@ -2,6 +2,7 @@
 #include <thread>
 #include <vector>
 #include <math.h>
+#include <string.h>
 
 #include "PPMImage.h"
 #include "Mandelbrot.h"
@@ -10,7 +11,7 @@ void createMandelbrotImageThread(Mandelbrot * mandelbrot, PPMImage &image) {
 	mandelbrot->calculateImage(image);
 }
 
-void createMandelbrotImage(PPMImage &image, unsigned int width, unsigned int height, int numOfThreads) {
+void createMandelbrotImage(PPMImage &image, unsigned int width, unsigned int height, int numOfThreads, int iterations) {
 
 	/*
 	 * 	sub image coordinate computation (e.g. 600x600, 4 threads) -> chess board method
@@ -66,7 +67,7 @@ void createMandelbrotImage(PPMImage &image, unsigned int width, unsigned int hei
 				minY = (i % devider) * (height / devider);
 				maxY = ((i % devider) + 1) * (height / devider);
 
-				partMandelbrot[i] = new Mandelbrot(width, height, minX, maxX, minY, maxY);
+				partMandelbrot[i] = new Mandelbrot(width, height, minX, maxX, minY, maxY, iterations);
 
 				workers.push_back(std::thread(createMandelbrotImageThread, partMandelbrot[i], std::ref(image)));
 
@@ -203,15 +204,33 @@ void createMandelbrotImageCompressed(std::string filename, unsigned int width, u
 int main() {
 	std::cout << "Mandelbrot Fractal Generator 1.0\n" << std::endl;
 
-	PPMImage image_1(600, 600);
+	/* example to create the Mandelbrot set depending on the number of iterations */
+	PPMImage image_1(1024, 1024);
 
-	createMandelbrotImage(image_1, 600, 600, 4);
-	image_1.save("pic/mandelbrot.ppm");
-	image_1.codeImg("pic/mandelbrot-coded-1.ppm");
+	for(int i = 0; i<50; i++) {
+		if( i % 10 == 0 ) {
+			createMandelbrotImage(image_1, 1024, 1024, 16, i);
+			image_1.save("pic/mandelbrot-" + std::to_string(i/10) + ".ppm");
+		}
+	}
 
+	/* example on how to encode / decode a created compressed *.ppm image */
 	PPMImage image_2(600, 600);
+
+	/* compress */
+
+	/* using the chess board method */
+	createMandelbrotImage(image_2, 600, 600, 16, 34);
+	image_2.codeImg("pic/mandelbrot-coded-1.ppm");
+
+	/* using the row method */
 	createMandelbrotImageCompressed("pic/mandelbrot-coded-2.ppm", 600, 600, 4);
-	image_2.decodeImg("pic/mandelbrot-coded-2.ppm", "pic/mandelbrot-decoded.ppm");
+
+	/* uncompress */
+
+	PPMImage image_3(600, 600);
+	image_3.decodeImg("pic/mandelbrot-coded-1.ppm", "pic/mandelbrot-decoded-1.ppm");
+	image_3.decodeImg("pic/mandelbrot-coded-2.ppm", "pic/mandelbrot-decoded-2.ppm");
 
     return 0;
 }
